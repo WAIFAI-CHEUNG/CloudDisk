@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="
+	    http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop.xsd
+        http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+
+	<!-- 配置扫描包 -->
+	<context:component-scan
+		base-package="com.controller,com.service,com.dao" />
+	<!-- 配置拦截器 -->
+	<mvc:interceptors>
+	<!-- 配置springmvc国际化本地语言拦截器 -->
+  	<bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor"/>
+		<mvc:interceptor>
+			<!-- 配置拦截器作用的路径 -->
+			<mvc:mapping path="/user/*" />
+			<mvc:mapping path="/file/*" />
+			<!-- 配置不需要拦截作用的路径 -->
+			<mvc:exclude-mapping
+				path="/user/loginCheck.action" />
+				<mvc:exclude-mapping
+				path="/user/register.action" />				
+			<!-- 定义在<mvc:interceptor>元素中，表示匹配指定路径的请求才进行拦截 -->
+			<bean class="com.intercept.LonginIntercept" />
+		</mvc:interceptor>
+	</mvc:interceptors>
+
+	<!-- 启动Spring MVC的注解功能 -->
+	<mvc:annotation-driven />
+	<!-- 配置处理器映射器 -->
+	<bean
+		class="org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping" />
+	<!-- 处理器 适配器 -->
+	<bean
+		class="org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter" />
+	<!-- 配置视图解析器 -->
+	<bean
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver"
+		id="internalResourceViewResolver">
+		<!-- 前缀 -->
+		<property name="prefix" value="/WEB-INF/" />
+		<!-- 后缀 -->
+		<property name="suffix" value=".jsp" />
+	</bean>
+	<!-- 配置静态资料映射 -->
+	<mvc:resources location="/WEB-INF/css/" mapping="/css/**"></mvc:resources>
+	<mvc:resources location="/WEB-INF/js/" mapping="/js/**"></mvc:resources>
+	<mvc:resources location="/WEB-INF/images/"
+		mapping="/images/**"></mvc:resources>
+
+<!-- 国际化 -->
+  	<!-- 配置springmvc国际化资源环境 -->
+<bean id="messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+<property name="basename" value="classpath:message"></property>
+</bean>
+<!-- 配置SessionLocaleResolver作为获取语言环境的方式 -->
+<bean id="localeResolver" class="org.springframework.web.servlet.i18n.SessionLocaleResolver">
+     <property name="defaultLocale" value="zn_CH"></property>
+</bean>
+
+<!-- 国际化拦截器配置属性 -->
+<bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor">
+  	        <property name="paramName" value="lang"></property>
+</bean>
+
+<!-- 统一异常处理 -->
+<bean class="com.exception.MyExceptionHandler"/>
+<!-- 配置SimpleMappingExceptionResolver（异常类与View的对应关系） -->
+	<bean class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">  
+	    <!-- 定义默认的异常处理页面，当该异常类型的注册时使用  --> 
+	    <property name="defaultErrorView" value="comment/default_error"></property>  
+	    <!-- 定义异常处理页面用来获取异常信息的变量名，默认名为exception   -->
+	    <property name="exceptionAttribute" value="ex"></property>  
+	  <!--   定义需要特殊处理的异常，用类名或完全路径名作为key，异常页名作为值 -->  
+	    <property name="exceptionMappings">  
+	        <props>  
+	            <prop key="com.exception.MyException">comment/my_error</prop> 
+	             <prop key="org.springframework.validation.BindException">comment/default_error</prop>
+	            <prop key="java.sql.SQLException">comment/default_error</prop> 
+	            <!-- 这里还可以继续扩展对不同异常类型的处理  -->
+	        </props>  
+	    </property>  
+	</bean>
+
+<!-- 文件上传 -->
+<bean id="multipartResolver"
+	class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+	<!--上传文件的最大大小，单位为字节 --> 
+	<property name="maxUploadSize" value="17367648787"></property>	 
+	<!-- 上传文件的编码 -->
+	<property name="defaultEncoding" value="UTF-8"></property>
+</bean>
+
+ <bean id="viewResolver"
+class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+<property name="viewClass">
+<value>org.springframework.web.servlet.view.JstlView</value>
+</property>
+<property name="prefix"><value>/WEB-INF/</value></property>
+<property name="suffix"><value>.jsp</value></property>
+</bean>
+</beans>

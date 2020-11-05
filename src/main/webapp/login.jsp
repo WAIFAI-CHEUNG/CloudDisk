@@ -7,8 +7,8 @@
 <title>云端网盘登录</title>
 <link rel="stylesheet" type="text/css" href="./css/login.css">
 <script type="text/javascript" src="./js/login.js"></script>
-</head>
 <body>
+</head>
 	<div id="cloud">
 		<div class="login">
 			<div class="loginTop">
@@ -24,10 +24,10 @@
 				</div>
 			</div>
 			<div class="loginContent">
-				<form class="content" action="LoginAndRegister/login.action" method="post"
+				<form class="content" action="user/loginCheck.action" method="post"
 					onsubmit="return checkLoad()">
 					<p style="text-align: center; font-size: 18px;">账号密码登录</p>
-					<input name="username" id="username" type="text"
+					<input name="userName" id="userName" type="text"
 						placeholder="账号/邮箱/用户名" class="ip" /> <input name="password"
 						id="password" type="password" placeholder="密码" class="ip" />
 					<div class="remeber">

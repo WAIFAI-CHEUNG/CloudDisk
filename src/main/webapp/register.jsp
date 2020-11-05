@@ -5,8 +5,8 @@
 <head>
 <meta charset="UTF-8">
 <title>注册云端网盘账号</title>
-<link rel="stylesheet" type="text/css" href="./css/register.css">
-<script type="text/javascript" src="./js/register.js"></script>
+<link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/css/register.css">
+<script type="text/javascript" src="<%=request.getContextPath()%>/js/register.js"></script>
 </head>
 <body>
 	<div id="register">
@@ -28,10 +28,10 @@
 		<div class="content">
 			<div class="reContent">
 				<div class="reContentLeft">
-					<form action="LoginAndRegister/register.action" method="post"
+					<form action="user/register.action" method="post"
 						onsubmit="return checkLoad()">
 						<div>
-							用户名称：<input type="text" id="username" name="username"
+							用户名称：<input type="text" id="username" name="userName"
 								placeholder="请输入用户名">
 						</div>
 						<div>
@@ -78,7 +78,7 @@
 			</div>
 		</div>
 		<div class="reBottom">
-			<img src="./images/foot_pic.jpg">
+			<img src="<%=request.getContextPath()%>/images/foot_pic.jpg">
 		</div>
 	</div>
 </body>

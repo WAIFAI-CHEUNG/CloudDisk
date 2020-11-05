@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.FileMapper">
+
+<resultMap type="CdFile" id="fileMap">
+<id property="fileId" column="fileId" jdbcType="DOUBLE"/>
+<result column="fileName" property="fileName" jdbcType="VARCHAR"/>
+<result column="fileType" property="fileType" jdbcType="VARCHAR"/>
+<result column="folderId" property="folderId" jdbcType="INTEGER"/>
+<result column="userId" property="userId" jdbcType="INTEGER"/>
+<result column="createTime" property="createTime" jdbcType="VARCHAR"/>
+<result column="status" property="status" jdbcType="INTEGER"/>
+<result column="localPath" property="localPath" jdbcType="VARCHAR"/>
+<result column="fileSize" property="fileSize" jdbcType="DOUBLE"/>
+<result column="mark" property="mark" jdbcType="VARCHAR"/>
+</resultMap>
+
+<resultMap type="Folder" id="folderMap">
+<id property="folderId" column="folderId" jdbcType="INTEGER"/>
+<result column="folderName" property="folderName" jdbcType="VARCHAR"/>
+<result column="localPath" property="localPath" jdbcType="VARCHAR"/>
+<result column="userId" property="userId" jdbcType="DOUBLE"/>
+<result column="parentId" property="parentId" jdbcType="INTEGER"/>
+<result column="createTime" property="createTime" jdbcType="VARCHAR"/>
+<result column="status" property="status" jdbcType="INTEGER"/>
+<result column="mark" property="mark" jdbcType="VARCHAR"/>
+</resultMap>
+
+<!-- 获取当前目录名称 -->
+<select id="currentFolderName" parameterType="int" resultType="String">
+SELECT folderName FROM cd_folder WHERE folderId=#{parentId}
+</select>
+
+<!-- 获取当前目录父目录id -->
+<select id="folderParentId" parameterType="int" resultType="int">
+SELECT parentId FROM cd_folder WHERE folderId=#{folderId}
+</select>
+
+<!-- 获取当前目录父目录名称 -->
+<select id="folderParentName" parameterType="int" resultType="int">
+SELECT folderName FROM cd_folder WHERE folderId=#{parentId}
+</select>
+
+<!-- 获取父目录本地磁盘地址 -->
+<select id="parentLocalPath" parameterType="int" resultType="String">
+SELECT localPath FROM cd_folder WHERE folderId=#{parentId}
+</select>
+
+<!-- 获取文件夹本地磁盘地址 -->
+<select id="folderLocalPath" parameterType="int" resultType="String">
+SELECT localPath FROM cd_folder WHERE folderId=#{folderId}
+</select>
+
+<!-- 显示文件列表，查询文件列表信息 -->
+<select id="showFileList" parameterType="int" resultMap="fileMap">
+SELECT * FROM cd_file WHERE STATUS=1 AND folderId=#{parentId} ORDER BY createTime DESC
+</select>
+
+<!-- 搜索文件，模糊搜索 -->
+<select id="searchFiles" resultMap="fileMap">
+SELECT * FROM cd_file WHERE fileName LIKE  concat('%',#{searchMessages,jdbcType=VARCHAR},'%') AND folderId=#{parentId,jdbcType=INTEGER} AND STATUS=1 ORDER BY createTime DESC
+</select>
+
+<!-- 搜索文件夹，模糊搜索 ,注意此处传值为file父目录id,(将文件夹看做file处理）故folderParentId=传进来的fileParentId-->
+<select id="searchFolders" resultMap="folderMap">
+SELECT * FROM cd_folder WHERE folderName LIKE  concat('%',#{searchMessages,jdbcType=VARCHAR},'%') AND parentId=#{parentId,jdbcType=INTEGER} AND STATUS=1 ORDER BY createTime DESC
+</select>
+
+<!-- 新建文件夹 -->
+<insert id="addFolder" parameterType="Folder">
+INSERT INTO cd_folder(folderName,localPath,userId,parentId,createTime) VALUES(#{folderName},#{localPath},#{userId},#{parentId},#{createTime})
+</insert>
+
+<!-- 添加文件 -->
+<insert id="addFile" parameterType="CdFile" >
+INSERT INTO cd_file(fileId,fileName,fileType,folderId,userId,createTime,localPath,fileSize) 
+VALUES(#{fileId},#{fileName},#{fileType},#{folderId},#{userId},#{createTime},#{localPath},#{fileSize})
+</insert>
+
+<!-- 查找当前文件夹所有的文件夹 -->
+<select id="currentFolderList" parameterType="int" resultMap="folderMap">
+SELECT * FROM cd_folder WHERE  parentId LIKE  concat(#{parentId}) AND STATUS=1 ORDER BY createTime DESC
+</select>
+
+<!-- 删除文件，修改status，放入回收站 -->
+<update id="alterFileStatus" parameterType="double" >
+UPDATE cd_file SET STATUS=0 WHERE fileId=#{fileId}
+</update>
+
+<!-- 删除文件夹，修改status，放入回收站 -->
+<update id="alterFolderStatus" parameterType="int" >
+UPDATE cd_folder SET STATUS=0 WHERE folderId=#{folderId}
+</update>
+
+<!-- 获取准备删除的文件：status=0  -->
+<select id="showRecycleBinFile" resultMap="fileMap">
+SELECT * FROM cd_file WHERE STATUS=0 ORDER BY createTime DESC
+</select>
+
+<!-- 获取准备删除的文件夹：status=0  -->
+<select id="showRecycleBinFolder" resultMap="folderMap">
+SELECT * FROM cd_folder WHERE STATUS=0 ORDER BY createTime DESC
+</select>
+
+<!--  获取该文件的父目录id -->
+<select id="fileParentId" parameterType="double" resultType="int">
+SELECT folderId FROM cd_file WHERE fileID=#{fileId}
+</select>
+
+<!-- 获取文件本地磁盘地址 -->
+<select id="fileLocalPath" parameterType="double" resultType="String">
+SELECT localPath FROM cd_file WHERE fileID=#{fileId}
+</select>
+
+<!-- 删除该文件数据库信息 -->
+<delete id="deleteInSql" parameterType="double">
+DELETE FROM cd_file WHERE fileId=#{fileId}
+</delete>
+
+<!-- 恢复文件，修改Status -->
+<update id="returnFileStatus" parameterType="double">
+UPDATE cd_file SET STATUS=1 WHERE fileId=#{fileId}
+</update>
+
+
+<!-- 删除该文件数据库信息 -->
+<delete id="deleteFolderInSql" parameterType="int">
+DELETE FROM cd_folder WHERE folderId=#{folderId}
+</delete>
+
+
+<!--  删除该文件夹所有文件数据库信息  -->
+<delete id="deleteFolderFileSql" parameterType="int">
+DELETE FROM cd_file WHERE folderId=#{folderId}
+</delete>
+
+
+<!-- 恢复文件夹，修改Status -->
+<update id="returnFolderStatus" parameterType="int">
+UPDATE cd_folder SET STATUS=1 WHERE folderId=#{folderId}
+</update>
+</mapper>
